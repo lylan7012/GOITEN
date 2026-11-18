@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gọi học sinh ngẫu nhiên</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fff4f6; --card:#ffffff; --ink:#3a0b16; --muted:#946270; --line:#f6cbd5;
+    --accent:#9e1b32; --accent-dark:#7a1226; --accent2:#ffe1e8; --pink:#f7a9bb; --warn:#b4233c; --full:#c9a9b1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Be Vietnam Pro",system-ui,sans-serif;color:var(--ink);
+    background:radial-gradient(circle at 0% 0%,#ffd6e0 0,transparent 40%),radial-gradient(circle at 100% 100%,#ffe3ea 0,transparent 45%),var(--bg);min-height:100vh}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+  .hero{background:linear-gradient(135deg,var(--accent) 0%,#c2334f 60%,var(--pink) 100%);color:#fff;border-radius:18px;padding:18px 20px;margin-bottom:16px;box-shadow:0 8px 24px rgba(158,27,50,.18)}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:.3px}
+  .sub{color:#ffe6ec;font-size:14px;margin:0}
+  .sub b{color:#fff}
+  .classbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .ctab{font:inherit;font-size:15px;font-weight:600;border:1.5px solid var(--pink);background:#fff;color:var(--accent);border-radius:999px;padding:8px 16px;cursor:pointer}
+  .ctab.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 12px rgba(158,27,50,.25)}
+  .ctab.add{font-weight:400;color:var(--accent);border-style:dashed}
+  .grid{display:grid;grid-template-columns:1fr 1.3fr;gap:16px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}.stagecard{order:-1}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(158,27,50,.06)}
+  .card h2,details summary{color:var(--accent)}
+  .card h2{font-size:15px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  textarea{width:100%;min-height:200px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;resize:vertical}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:14px;color:var(--ink)}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  button.primary:hover{background:var(--accent-dark)}
+  button.big{font-size:20px;padding:14px 34px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#c2334f);box-shadow:0 6px 18px rgba(158,27,50,.3);letter-spacing:.5px}
+  input[type=checkbox]{accent-color:var(--accent)}
+  button.danger{color:#b91c1c}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  label.opt{font-size:14px;display:flex;gap:6px;align-items:center;color:var(--ink)}
+  select,input[type=text]{font:inherit;font-size:14px;padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
+  input[type=number]{width:70px;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+  .stage{text-align:center;padding:20px 12px;margin:-4px -4px 14px;border-radius:14px;background:linear-gradient(180deg,#fff0f4,#fff)}
+  .cls{font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.5px}
+  .name{font-size:clamp(30px,7vw,52px);font-weight:800;color:var(--ink);min-height:1.3em;letter-spacing:-.5px;transition:color .2s;line-height:1.2}
+  .name.rolling{color:var(--pink)}
+  .name.done{color:var(--accent)}
+  .meta{color:var(--muted);font-size:14px;min-height:1.4em;margin-top:4px}
+  .stats{display:flex;gap:10px;justify-content:center;margin:12px 0 16px;flex-wrap:wrap}
+  .stat{background:var(--accent2);border-radius:10px;padding:6px 12px;font-size:13px;color:var(--accent-dark)}
+  .stat b{font-size:15px;color:var(--accent)}
+  .roster{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer;user-select:none;display:flex;gap:6px;align-items:center;background:#fff}
+  .chip .no{color:var(--muted);font-size:11px}
+  .chip .dots{display:inline-flex;gap:2px}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+  .chip .dot.on{background:var(--accent)}
+  .chip.full{background:#f3f4f6;color:var(--full)}
+  .chip.full .dot.on{background:var(--full)}
+  .chip.absent{color:var(--muted);background:#f4eff0;border-color:#e2d6d9}
+  .chip.absent .nm{text-decoration:line-through}
+  .chip.last{outline:2px solid var(--accent)}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  ol.hist{margin:0;padding-left:22px;font-size:14px;max-height:220px;overflow:auto}
+  ol.hist li{padding:2px 0}
+  ol.hist .t{color:var(--muted);font-size:12px;margin-left:6px}
+  .msg{color:var(--warn);font-size:14px;margin-top:8px;min-height:1.2em}
+  .numbox{margin-top:14px;padding:10px 12px;border:1px dashed var(--pink);border-radius:10px;background:#fff8fa}
+  .numtitle{font-size:14px;font-weight:600}
+  details summary{cursor:pointer;font-size:15px;font-weight:600}
+  button.toggle.on{background:var(--accent2);border-color:var(--accent);color:var(--accent);font-weight:600}
+  .prev{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:14px}
+  .prev.latest{border-color:var(--accent);background:#fff3f6}
+  .prev .ph{font-size:12px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
+  .prev .nums{display:flex;flex-wrap:wrap;gap:4px}
+  .prev .num{color:var(--accent-dark);background:var(--accent2);border-radius:6px;padding:1px 7px;font-weight:600;font-size:13px}
+  .chip.prevcalled{border-color:var(--pink);border-style:dashed;background:#fff6f8}
+  .chip{padding:4px 5px 4px 10px}
+  .pm{display:inline-flex;align-items:center;gap:2px;margin-left:2px;text-decoration:none}
+  .pm button{width:26px;height:26px;padding:0;border-radius:50%;font-size:16px;line-height:1;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--pink);background:#fff;color:var(--accent)}
+  .pm button.pl{background:var(--accent);border-color:var(--accent);color:#fff}
+  .pm button:active{transform:scale(.9)}
+  .sc{min-width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted)}
+  .sc.pos{color:var(--accent)}
+  .sc.neg{color:#6b4b53}
+  .stagepm{display:none;justify-content:center;margin-top:10px}
+  .stagepm.show{display:flex}
+  .stagepm .pm button{width:40px;height:40px;font-size:22px}
+  .stagepm .sc{font-size:20px;min-width:44px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal.show{display:flex}
+  .modal .box{background:#fff;border-radius:14px;padding:18px;max-width:360px;width:100%}
+  .modal p{margin:0 0 14px}
+  .modal input[type=text]{width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Gọi học sinh ngẫu nhiên</h1>
+    <p class="sub">Mỗi em được gọi tối đa <b id="limitTxt">2</b> lần trong một tiết. Mỗi lớp lưu tiến độ riêng.</p>
+  </div>
+
+  <div class="classbar" id="classbar"></div>
+
+  <div class="grid">
+    <div class="card">
+      <details id="editBox">
+        <summary>Danh sách lớp <span id="countTxt" style="font-weight:400;color:var(--muted);font-size:13px"></span></summary>
+        <textarea id="list" style="margin-top:10px" placeholder="Dán danh sách, mỗi dòng một tên"></textarea>
+        <div class="row">
+          <button class="primary" id="saveBtn">Lưu danh sách</button>
+          <button id="restoreBtn">Khôi phục danh sách gốc</button>
+          <button class="danger" id="delClassBtn">Xóa lớp này</button>
+        </div>
+        <div class="numbox">
+          <div class="numtitle">Hoặc gọi theo số thứ tự</div>
+          <div class="row" style="margin-top:6px">
+            <label class="opt">Từ <input type="number" id="numFrom" min="1" value="1" inputmode="numeric"></label>
+            <label class="opt">đến <input type="number" id="numTo" min="1" value="40" inputmode="numeric"></label>
+            <button class="primary" id="numBtn">Tạo lớp theo số</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="row" style="margin-top:14px">
+        <label class="opt">Số lần tối đa / tiết
+          <select id="limitSel"><option>1</option><option selected>2</option><option>3</option></select>
+        </label>
+      </div>
+      <div class="row">
+        <label class="opt"><input type="checkbox" id="prefer" checked> Ưu tiên em chưa được gọi</label>
+      </div>
+      <div class="row">
+        <label class="opt"><input type="checkbox" id="noRepeat" checked> Không gọi 1 em 2 lần liên tiếp</label>
+      </div>
+      <div class="row">
+        <button id="avoidBtn" class="toggle">Tránh trùng em đã gọi ở tiết trước: TẮT</button>
+      </div>
+      <p class="hint">Bấm "Danh sách lớp" để xem hoặc sửa tên. Mọi thay đổi được lưu trên trình duyệt này.</p>
+    </div>
+
+    <div class="card stagecard">
+      <div class="stage">
+        <div class="cls" id="clsLabel"></div>
+        <div class="name" id="name">SẴN SÀNG</div>
+        <div class="meta" id="meta">Bấm nút để gọi học sinh</div>
+        <div class="stagepm" id="stagePm"><span class="pm"><button class="mi" id="stMinus" aria-label="Trừ điểm">−</button><b class="sc" id="stScore">0</b><button class="pl" id="stPlus" aria-label="Cộng điểm">+</button></span></div>
+        <div class="stats">
+          <div class="stat">Đã gọi: <b id="sTotal">0</b></div>
+          <div class="stat">Chưa gọi: <b id="sZero">0</b></div>
+          <div class="stat">Còn lượt: <b id="sLeft">0</b></div>
+        </div>
+        <div class="row" style="justify-content:center">
+          <button class="primary big" id="pickBtn">TỚI SỐ RỒI !</button>
+        </div>
+        <div class="row" style="justify-content:center">
+          <button id="undoBtn">Hoàn tác lượt cuối</button>
+          <button id="newBtn">Tiết mới</button>
+        </div>
+        <div class="msg" id="msg"></div>
+      </div>
+
+      <h2>Cả lớp</h2>
+      <div class="roster" id="roster"></div>
+      <p class="hint">Thứ tự gọi của mỗi tiết luôn khác các tiết trước: lượt thứ 1, 2, 3… không trùng em đã gọi ở cùng lượt đó trong các tiết đã lưu.</p>
+      <p class="hint">Chấm đỏ = số lần đã gọi trong tiết. Nút − / + để trừ hoặc cộng điểm (điểm được giữ qua các tiết). Chạm vào tên để đánh dấu vắng.</p>
+      <div class="row"><button id="resetScoreBtn" style="font-size:13px">Xóa điểm cộng/trừ của lớp</button></div>
+
+      <h2 style="margin-top:16px">Lịch sử tiết này</h2>
+      <ol class="hist" id="hist"></ol>
+
+      <h2 style="margin-top:16px">Các tiết trước</h2>
+      <div id="prevBox"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="confirmModal">
+  <div class="box">
+    <p id="confirmText"></p>
+    <div class="row" style="justify-content:flex-end">
+      <button id="cancelBtn">Hủy</button>
+      <button class="primary" id="okBtn">Đồng ý</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="addModal">
+  <div class="box">
+    <p><b>Thêm lớp mới</b></p>
+    <input type="text" id="newClassName" placeholder="Tên lớp, ví dụ 10A05">
+    <div class="row" style="justify-content:flex-end">
+      <button id="addCancel">Hủy</button>
+      <button class="primary" id="addOk">Thêm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_CLASSES = {
+  "10A07": `Bùi Quốc Bảo
+Lê Gia Bảo
+Lê Thiện Bảo
+Bùi Nguyễn Chí Công
+Văn Công Thành Đạt
+Trần Nguyễn Khánh Đăng
+Nguyễn Hoàng Gia Huân
+Trần Hồ Gia Huy
+Đặng Khang Hưng
+Lê Trịnh Quỳnh Hương
+Đinh Thị Minh Hương
+Vũ Anh Kiệt
+Lê Nguyễn Quốc Minh Khang
+Nguyễn Tuấn Khanh
+Đặng Công Khánh
+Phạm Khiết Minh Khiêm
+Nguyễn Trần Minh Khoa
+Nguyễn Đăng Khoa
+Nguyễn Đăng Khôi
+Trần Quỳnh Lam
+Nguyễn Công Minh Lâm
+Nguyễn Nhật Minh
+Lê Nguyễn Duy Minh
+Nguyễn Hà Nam
+Nguyễn Kim Ngọc
+Nguyễn Khôi Nguyên
+Lê Thị Ý Như
+Hồ Hoàng Gia Phát
+Lê Huỳnh Tấn Phát
+Lưu Vũ Nhật Phi
+Nông Thanh Phong
+Nguyễn Xuân Gia Phú
+Nguyễn Gia Phúc
+Nguyễn Hữu Phước
+Trần Thị Diễm Quỳnh
+Lê Thị Ngọc Sang
+Huỳnh Ngọc Nhật Tân
+Nguyễn Tân
+Bùi Anh Tuấn
+Lâm Linh Tuyền
+Cao Gia Tường
+Mai Hà Anh Thư
+Lê Võ Thanh Trúc
+Nguyễn Cảnh Vy
+Lê Nguyễn Tường Vy
+Hoàng Hải Yến
+Nguyễn Hoàng Yến`,
+  "10A13": `Đặng Tuấn Anh
+Nguyễn Ngọc Vân Anh
+Nguyễn Huỳnh Ngọc Châu
+Đinh Nhật Bảo Châu
+Trương Ngọc Lan Chi
+Lê Nguyễn Thùy Dương
+Nguyễn Lê Nhật Đăng
+Châu An Hạ
+Dương Thanh Hải
+Lê Dương Minh Hào
+Cao Nguyễn Gia Hân
+Nguyễn Lý Chiêu Hoàng
+Nguyễn Việt Hùng
+Lý Minh Huy
+Hồ Quỳnh Hương
+Nguyễn Lạc Minh Khang
+Nguyễn Thị Thùy Linh
+Lê Phương Linh
+Cao Vũ Ngọc Linh
+Trần Vũ Hoàng Long
+Thi Khởi My
+Trần Tố Ngân
+Hoàng Thị Khánh Ngọc
+Trần Bảo Ngọc
+Nguyễn Hoàng Thảo Nguyên
+Nguyễn Trọng Nhân
+Nguyễn Quỳnh Như
+Trần Thị Huyền Như
+Vòng Gi Phón
+Tống Như Quỳnh
+Nguyễn Thị Thanh Tâm
+Nguyễn Hoàng Tân
+Trần Quang Tú
+Trần Nguyễn Thanh Tùng
+Nguyễn Ngọc Thanh Tuyền
+Huỳnh Hạo Thiên
+Nguyễn Thái Minh Thư
+Lê Ngọc Trâm
+Nguyễn Ngọc Thanh Trâm
+Tăng Thị Ngọc Trinh
+Lại Quốc Trường
+Nguyễn Ngọc Phương Uyên
+Trần Quốc Vinh`,
+  "10A16": `Lê Hồ Trường An
+Nguyễn Đăng An
+Nguyễn Đức Anh
+Lê Kim Anh
+Nguyễn Ngọc Như Anh
+Nguyễn Tiến Anh
+Nguyễn Minh Anh
+Nguyễn Thị Minh Anh
+Ngô Quốc Bảo
+Mai Thanh Chương
+Phan Kiều Mỹ Duyên
+Hoàng Thùy Dương
+Trần Linh Đan
+Lê Hải Đăng
+Đồng Nguyễn Ngọc Hân
+Hà Trung Hậu
+Vương Kim Hồng
+Nguyễn Đức Gia Huy
+Trần Nhật Minh Huy
+Lê Hoàng Lâm
+Đinh Thị Diệu Linh
+Lê Minh Dương Linh
+Nguyễn Hoài Nam
+Đào Trần Nhật Nam
+Trần Thị Kim Ngân
+Trần Kim Ngọc
+Nguyễn Trọng Nhân
+Phùng Phương Nhi
+Nguyễn Hoàng Phát
+Nguyễn Duy Phương
+Trần Hoàng Quân
+Trần Tú Quyên
+Mã Đàm Thúy Tiên
+Phạm Hoàng Tuấn Tú
+Lê Doãn Thảo
+Cao Thị Hồng Thắm
+Phạm Thị Anh Thơ
+Đàm Thị Huyền Trân
+Trần Hoàng Mỹ Uyên
+Bùi Hoàng Gia Uyên
+Phạm Nhật Vi
+Nguyễn Ngọc Minh Vy
+Võ Kiều Vy`,
+  "TA-10": `Lê Nguyễn Minh Trí
+Võ Hoàng Hải Yến
+Phạm Võ Phương Nguyên
+Nguyễn Đặng Yến Nhi
+Trần Sử Hoàng Nguyên
+Dương Ngọc Thanh Xuân
+Nguyễn Thị Yến Nhi
+Phùng Lam Thuận
+Nguyễn Đỗ Thảo Trang
+Vũ Thanh Phong
+Nguyễn Đan Vy
+Lê Trọng Nhân
+Nguyễn Thị Mỹ Nhung
+Lâm Tuyết Nhi
+Dương Thị Hải Yến
+Nguyễn Thành Phong
+Lê Dương Tiến Minh
+Nguyễn Đức Quang Vinh
+Lê Minh Thái
+Trần Nguyễn Huyền Trâm
+Nguyễn Vương Minh Long
+Lê Giang Thảo Ngọc
+Nguyễn Vũ Như Ý
+Bùi Nguyễn Thùy My`,
+  "TA-12": `Nguyễn Đỗ Duy Bảo
+Nguyễn Ngọc Diệp
+Nguyễn Thành Danh
+Nguyễn Ngọc Phương Vy
+Huỳnh Tô Vũ Phụng
+Tôn Thị Bích Vy
+Đào Xuân Anh
+Trần Bảo Ngọc
+Trần Lê Thanh Tuyền
+Trần Ngọc Kỳ Anh
+Đoàn Ngọc Tường Vy
+Võ Lê Mỹ An
+Nguyễn Thị Ánh Quyên
+Nguyễn Thanh Vy
+Trần Hoàng Hải
+Nguyễn Trúc Thảo Ly
+Huỳnh Thanh Hậu
+Nguyễn Trọng Nhân
+Trần Hoàng Gia Bảo
+Trần Thị Ngọc Châu
+Hoàng Lê Gia Như
+Nguyễn Thị Bảo Nhi
+Hoàng Minh Hằng
+Nguyễn Thảo Nguyên
+Nguyễn Nguyễn Thùy Anh
+Trịnh Gia Huy
+Võ Nguyễn Khả Mi`,
+  "A10": `Phan Lâm Thúy Vy
+Hoàng Thị Mỹ Tâm
+Nghiêm Anh Minh
+Lê Trần Khánh Như
+Trần Thiện Phúc
+Lê Thị Thanh Ngọc
+Nguyễn Hà Phương
+Phạm Mỹ Quyên
+Trần Phương Thảo
+Nguyễn Ngọc Anh Thư
+Đặng Minh Triền
+Hồ Gia Phát
+Lâm Phước Tài
+Nguyễn Trần Thu Vân
+Vũ Ngọc Phương Nghi`,
+  "A12": `Trần Nhật Long
+Phạm Thiên Ân
+Đỗ Duy Đại
+Bùi Tâm Đoan
+Nguyễn Minh Quang
+Nguyễn Mậu Huy Hoàng
+Võ Lê Đăng Khoa
+Hoàng Sĩ Trung
+Lê Hữu Lộc
+Trần Thuỳ Trâm
+Vương Gia Huy
+Đào Thị Kim Ngân
+Trần Thị Ý Nhi`
+};
+
+const KEY = "random-picker-v2";
+const $ = id => document.getElementById(id);
+
+function parseList(text){
+  const seen = new Set(), out = [];
+  text.split(/\r?\n/).map(s => s.replace(/^\s*\d+[\.\)\-\s]+/, "").trim()).filter(Boolean).forEach(n => {
+    let name = n, k = 2;
+    while (seen.has(name)) name = n + " (" + k++ + ")";
+    seen.add(name); out.push(name);
+  });
+  return out;
+}
+function newClass(students){ return { students, counts:{}, absent:{}, history:[], prev:[], orders:[], scores:{} }; }
+
+let state = { classes:{}, order:[], current:null, limit:2, prefer:true, noRepeat:true, avoidPrev:false };
+function initDefaults(){
+  Object.keys(DEFAULT_CLASSES).forEach(k => {
+    if (!state.classes[k]) { state.classes[k] = newClass(parseList(DEFAULT_CLASSES[k])); if (!state.order.includes(k)) state.order.push(k); }
+  });
+  if (!state.current || !state.classes[state.current]) state.current = state.order[0] || null;
+}
+function load(){
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.classes) state = Object.assign(state, s); } catch(e){}
+  state.order = state.order.filter(k => state.classes[k]);
+  Object.keys(state.classes).forEach(k => { if (!state.order.includes(k)) state.order.push(k); });
+  if (!state.deletedDefaults) state.deletedDefaults = [];
+  Object.keys(DEFAULT_CLASSES).forEach(k => {
+    if (!state.classes[k] && !state.deletedDefaults.includes(k)) { state.classes[k] = newClass(parseList(DEFAULT_CLASSES[k])); state.order.push(k); }
+  });
+  if (!state.order.length) initDefaults();
+  if (!state.current || !state.classes[state.current]) state.current = state.order[0];
+  Object.values(state.classes).forEach(c => {
+    if (!c.prev) c.prev = [];
+    if (!c.orders) c.orders = c.prev.map(p => p.items.map(it => it.name));
+  });
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+const C = () => state.classes[state.current];
+function prevSet(){
+  const c = C(); const s = new Set();
+  if (c && c.prev && c.prev.length) c.prev[0].items.forEach(it => s.add(it.name));
+  return s;
+}
+
+function eligible(){
+  const c = C(); if (!c) return [];
+  return c.students.filter(n => !c.absent[n] && (c.counts[n] || 0) < state.limit);
+}
+
+let rolling = false;
+function resetStage(text, meta){
+  $("name").textContent = text; $("name").className = "name"; $("meta").textContent = meta || "";
+}
+
+function render(){
+  const c = C();
+  // class tabs
+  const bar = $("classbar"); bar.innerHTML = "";
+  state.order.forEach(k => {
+    const b = document.createElement("button");
+    b.className = "ctab" + (k === state.current ? " on" : "");
+    b.textContent = k;
+    b.onclick = () => { if (rolling || k === state.current) return; state.current = k; save(); showLast(); render(); };
+    bar.appendChild(b);
+  });
+  const add = document.createElement("button"); add.className = "ctab add"; add.textContent = "+ Thêm lớp";
+  add.onclick = () => { $("newClassName").value = ""; $("addModal").classList.add("show"); setTimeout(() => $("newClassName").focus(), 50); };
+  bar.appendChild(add);
+
+  $("clsLabel").textContent = state.current ? "LỚP " + state.current : "";
+  $("limitSel").value = String(state.limit);
+  $("limitTxt").textContent = state.limit;
+  $("prefer").checked = state.prefer;
+  $("noRepeat").checked = state.noRepeat;
+  $("avoidBtn").className = "toggle" + (state.avoidPrev ? " on" : "");
+  $("avoidBtn").textContent = "Tránh trùng em đã gọi ở tiết trước: " + (state.avoidPrev ? "BẬT" : "TẮT");
+  $("restoreBtn").style.display = DEFAULT_CLASSES[state.current] ? "" : "none";
+
+  if (!c) { $("roster").innerHTML = ""; $("hist").innerHTML = ""; $("prevBox").innerHTML = ""; return; }
+  const ps = prevSet();
+  if (document.activeElement !== $("list")) $("list").value = c.students.join("\n");
+  $("countTxt").textContent = "· " + c.students.length + " học sinh";
+
+  const present = c.students.filter(n => !c.absent[n]);
+  $("sTotal").textContent = c.history.length;
+  $("sZero").textContent = present.filter(n => !(c.counts[n] || 0)).length;
+  $("sLeft").textContent = present.reduce((a, n) => a + Math.max(0, state.limit - (c.counts[n] || 0)), 0);
+
+  const last = c.history.length ? c.history[c.history.length - 1].name : null;
+  const r = $("roster"); r.innerHTML = "";
+  c.students.forEach((n, i) => {
+    const cnt = c.counts[n] || 0;
+    const el = document.createElement("div");
+    el.className = "chip" + (c.absent[n] ? " absent" : cnt >= state.limit ? " full" : "") + (n === last ? " last" : "") + (state.avoidPrev && ps.has(n) && !c.absent[n] ? " prevcalled" : "");
+    const dots = Array.from({length: state.limit}, (_, j) => `<span class="dot${j < cnt ? " on" : ""}"></span>`).join("");
+    const sc = (c.scores || {})[n] || 0;
+    el.innerHTML = `<span class="no">${i + 1}</span><span class="nm"></span><span class="dots">${dots}</span><span class="pm"><button class="mi" aria-label="Trừ điểm">−</button><b class="sc${sc > 0 ? " pos" : sc < 0 ? " neg" : ""}">${sc > 0 ? "+" + sc : sc}</b><button class="pl" aria-label="Cộng điểm">+</button></span>`;
+    el.querySelector(".nm").textContent = n;
+    el.querySelector(".mi").onclick = e => { e.stopPropagation(); addScore(n, -1); };
+    el.querySelector(".pl").onclick = e => { e.stopPropagation(); addScore(n, 1); };
+    el.onclick = () => { if (rolling) return; if (c.absent[n]) delete c.absent[n]; else c.absent[n] = true; save(); render(); };
+    r.appendChild(el);
+  });
+
+  renderStageScore();
+  const h = $("hist"); h.innerHTML = "";
+  c.history.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = (item.stt || (c.students.indexOf(item.name) + 1)) + ". " + item.name;
+    const t = document.createElement("span"); t.className = "t"; t.textContent = item.time + " · lần " + item.n;
+    li.appendChild(t); h.appendChild(li);
+  });
+  h.scrollTop = h.scrollHeight;
+  if (!c.history.length) h.innerHTML = '<li style="list-style:none;margin-left:-22px;color:var(--muted)">Chưa gọi em nào.</li>';
+
+  const pb = $("prevBox"); pb.innerHTML = "";
+  if (!c.prev.length) pb.innerHTML = '<p class="hint" style="margin:0">Chưa có. Khi bấm "Tiết mới", danh sách số thứ tự đã gọi của tiết hiện tại sẽ được lưu ở đây.</p>';
+  c.prev.forEach((p, idx) => {
+    const box = document.createElement("div"); box.className = "prev" + (idx === 0 ? " latest" : "");
+    const uniq = [...new Set(p.items.map(it => it.stt))].sort((a, b) => a - b);
+    box.innerHTML = `<div class="ph"><span>${idx === 0 ? "Tiết gần nhất" : "Tiết trước nữa"} · ${p.time}</span><span>${uniq.length} em · ${p.items.length} lượt</span></div><div class="nums"></div>`;
+    const nums = box.querySelector(".nums");
+    uniq.forEach(n => {
+      const sp = document.createElement("span"); sp.className = "num"; sp.textContent = n;
+      const nm = (p.items.find(it => it.stt === n) || {}).name; if (nm) sp.title = nm;
+      nums.appendChild(sp);
+    });
+    pb.appendChild(box);
+  });
+  if (c.prev.length) {
+    const clr = document.createElement("button"); clr.textContent = "Xóa lịch sử các tiết trước"; clr.style.fontSize = "13px";
+    clr.onclick = () => ask("Xóa lịch sử các tiết trước của lớp " + state.current + "? Việc chống trùng thứ tự gọi cũng sẽ bắt đầu lại.", () => { C().prev = []; C().orders = []; save(); render(); });
+    pb.appendChild(clr);
+  }
+
+  $("pickBtn").disabled = rolling || !c.students.length;
+  $("undoBtn").disabled = rolling || !c.history.length;
+  $("msg").textContent = !c.students.length ? "Lớp này chưa có danh sách. Mở \"Danh sách lớp\" để nhập."
+    : !eligible().length ? "Tất cả học sinh có mặt đã được gọi đủ " + state.limit + " lần. Bấm \"Tiết mới\" để bắt đầu lại." : "";
+}
+
+function addScore(n, d){
+  const c = C(); if (!c) return;
+  if (!c.scores) c.scores = {};
+  c.scores[n] = (c.scores[n] || 0) + d;
+  if (!c.scores[n]) delete c.scores[n];
+  save(); render();
+}
+function renderStageScore(){
+  const c = C(), box = $("stagePm");
+  const last = c && c.history.length && !rolling ? c.history[c.history.length - 1].name : null;
+  box.classList.toggle("show", !!last);
+  if (!last) return;
+  const sc = (c.scores || {})[last] || 0, el = $("stScore");
+  el.textContent = sc > 0 ? "+" + sc : sc;
+  el.className = "sc" + (sc > 0 ? " pos" : sc < 0 ? " neg" : "");
+}
+function showLast(){
+  const c = C();
+  if (c && c.history.length) {
+    const l = c.history[c.history.length - 1];
+    $("name").textContent = l.name; $("name").className = "name done";
+    $("meta").textContent = "STT " + (c.students.indexOf(l.name) + 1) + " · lần " + l.n + " / " + state.limit;
+  } else resetStage("SẴN SÀNG", "Bấm nút để gọi học sinh");
+}
+
+function choose(){
+  const c = C();
+  let pool = eligible();
+  if (!pool.length) return null;
+  if (state.avoidPrev) {
+    const ps = prevSet();
+    const p0 = pool.filter(n => !ps.has(n));
+    if (p0.length) pool = p0;
+  }
+  if (state.noRepeat && pool.length > 1 && c.history.length) {
+    const last = c.history[c.history.length - 1].name;
+    const p2 = pool.filter(n => n !== last);
+    if (p2.length) pool = p2;
+  }
+  // Thứ tự gọi không lặp lại tiết trước: ở lượt thứ k, tránh em đã được gọi ở lượt thứ k của bất kỳ tiết nào trước đó
+  const k = c.history.length, orders = c.orders || [];
+  if (orders.length) {
+    const usedAtK = new Set(orders.map(o => o[k]).filter(Boolean));
+    const p1 = pool.filter(n => !usedAtK.has(n));
+    if (p1.length) pool = p1;
+    else {
+      // Dự phòng: ít nhất không để chuỗi gọi từ đầu đến giờ trùng hệt một tiết cũ
+      const cur = c.history.map(h => h.name);
+      const p2 = pool.filter(n => !orders.some(o => o.length > k && cur.every((x, i) => o[i] === x) && o[k] === n));
+      if (p2.length) pool = p2;
+    }
+  }
+  if (state.prefer) {
+    const min = Math.min(...pool.map(n => c.counts[n] || 0));
+    pool = pool.filter(n => (c.counts[n] || 0) === min);
+  }
+  const arr = new Uint32Array(1); crypto.getRandomValues(arr);
+  return pool[arr[0] % pool.length];
+}
+
+function pick(){
+  const c = C(); const winner = choose();
+  if (!winner) { render(); return; }
+  rolling = true; render();
+  const nameEl = $("name"), present = c.students.filter(n => !c.absent[n]);
+  nameEl.className = "name rolling"; $("meta").textContent = "Đang chọn...";
+  let i = 0; const steps = 18;
+  (function tick(){
+    if (i < steps) {
+      nameEl.textContent = present[Math.floor(Math.random() * present.length)];
+      i++; setTimeout(tick, 40 + i * 9);
+    } else {
+      c.counts[winner] = (c.counts[winner] || 0) + 1;
+      c.history.push({ name: winner, stt: c.students.indexOf(winner) + 1, n: c.counts[winner], time: new Date().toLocaleTimeString("vi-VN", {hour:"2-digit", minute:"2-digit"}) });
+      save(); rolling = false; showLast(); render();
+    }
+  })();
+}
+
+let pendingConfirm = null;
+function ask(text, fn){ $("confirmText").textContent = text; pendingConfirm = fn; $("confirmModal").classList.add("show"); }
+$("cancelBtn").onclick = () => { pendingConfirm = null; $("confirmModal").classList.remove("show"); };
+$("okBtn").onclick = () => { const f = pendingConfirm; pendingConfirm = null; $("confirmModal").classList.remove("show"); if (f) f(); };
+
+function addClass(name, students){
+  name = name.trim(); if (!name) return false;
+  let k = name, i = 2; while (state.classes[k]) k = name + " (" + i++ + ")";
+  state.classes[k] = newClass(students || []); state.order.push(k); state.current = k;
+  save(); showLast(); render(); return k;
+}
+
+$("pickBtn").onclick = pick;
+const lastName = () => { const c = C(); return c && c.history.length ? c.history[c.history.length - 1].name : null; };
+$("stMinus").onclick = () => { const n = lastName(); if (n) addScore(n, -1); };
+$("stPlus").onclick = () => { const n = lastName(); if (n) addScore(n, 1); };
+$("resetScoreBtn").onclick = () => ask("Xóa toàn bộ điểm cộng/trừ của lớp " + state.current + "?", () => { C().scores = {}; save(); render(); });
+$("saveBtn").onclick = () => {
+  const c = C(); if (!c) return;
+  c.students = parseList($("list").value);
+  Object.keys(c.counts).forEach(n => { if (!c.students.includes(n)) delete c.counts[n]; });
+  Object.keys(c.absent).forEach(n => { if (!c.students.includes(n)) delete c.absent[n]; });
+  save(); $("list").blur(); render(); $("msg").textContent = "Đã lưu danh sách lớp " + state.current + ".";
+};
+$("restoreBtn").onclick = () => ask("Khôi phục danh sách gốc của lớp " + state.current + "? Tiến độ tiết này sẽ được xóa.", () => {
+  state.classes[state.current] = newClass(parseList(DEFAULT_CLASSES[state.current])); save(); showLast(); render();
+});
+$("delClassBtn").onclick = () => ask("Xóa lớp " + state.current + " khỏi danh sách?", () => {
+  if (DEFAULT_CLASSES[state.current]) { state.deletedDefaults = state.deletedDefaults || []; state.deletedDefaults.push(state.current); }
+  delete state.classes[state.current]; state.order = state.order.filter(k => k !== state.current);
+  state.current = state.order[0] || null; save(); showLast(); render();
+});
+$("numBtn").onclick = () => {
+  let a = parseInt($("numFrom").value, 10), b = parseInt($("numTo").value, 10);
+  if (isNaN(a) || isNaN(b)) { $("msg").textContent = "Hãy nhập đủ số bắt đầu và số kết thúc."; return; }
+  if (a > b) [a, b] = [b, a];
+  if (b - a > 499) { $("msg").textContent = "Khoảng số tối đa 500 em."; return; }
+  addClass("Số " + a + "–" + b, Array.from({length: b - a + 1}, (_, i) => String(a + i)));
+};
+$("addOk").onclick = () => {
+  const n = $("newClassName").value; if (!n.trim()) return;
+  $("addModal").classList.remove("show");
+  addClass(n, []); $("editBox").open = true; $("list").focus();
+};
+$("newClassName").addEventListener("keydown", e => { if (e.key === "Enter") $("addOk").click(); });
+$("addCancel").onclick = () => $("addModal").classList.remove("show");
+$("limitSel").onchange = e => { state.limit = +e.target.value; save(); render(); };
+$("prefer").onchange = e => { state.prefer = e.target.checked; save(); };
+$("noRepeat").onchange = e => { state.noRepeat = e.target.checked; save(); };
+$("avoidBtn").onclick = () => { state.avoidPrev = !state.avoidPrev; save(); render();
+  if (state.avoidPrev && !C().prev.length) $("msg").textContent = "Lớp này chưa có tiết trước để so. Bấm \"Tiết mới\" sau mỗi tiết để lưu lại."; };
+$("undoBtn").onclick = () => {
+  const c = C(); const last = c.history.pop(); if (!last) return;
+  c.counts[last.name] = Math.max(0, (c.counts[last.name] || 1) - 1);
+  save(); resetStage("Đã hoàn tác", last.name + " được trả lại 1 lượt"); render();
+};
+$("newBtn").onclick = () => ask("Bắt đầu tiết mới cho lớp " + state.current + "? Danh sách đã gọi của tiết này sẽ được lưu vào mục Các tiết trước.", () => {
+  const c = C();
+  if (c.history.length) {
+    const d = new Date();
+    c.prev.unshift({
+      time: d.toLocaleDateString("vi-VN", {day:"2-digit", month:"2-digit"}) + " " + d.toLocaleTimeString("vi-VN", {hour:"2-digit", minute:"2-digit"}),
+      items: c.history.map(it => ({ name: it.name, stt: it.stt || (c.students.indexOf(it.name) + 1), n: it.n }))
+    });
+    c.prev = c.prev.slice(0, 5);
+    c.orders.unshift(c.history.map(it => it.name));
+    c.orders = c.orders.slice(0, 60);
+  }
+  c.counts = {}; c.history = []; c.absent = {}; save();
+  resetStage("SẴN SÀNG", "Tiết mới đã bắt đầu"); render();
+});
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !["TEXTAREA","INPUT","SELECT","BUTTON"].includes(e.target.tagName) && !rolling) { e.preventDefault(); pick(); }
+});
+
+load(); showLast(); render();
+</script>
+</body>
+</html>
